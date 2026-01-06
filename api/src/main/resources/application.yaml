@@ -16,3 +16,16 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+# 启用 Actuator 端点，并暴露 Prometheus 指标接口：
+# 启用成功后，可以通过访问 http://localhost:9200/actuator/prometheus 来获取 Prometheus 格式的指标数据。
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics  # 暴露 prometheus 端点
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+
