@@ -32,7 +32,7 @@ public class AuthController {
     // 查询登录状态，浏览器访问： http://localhost:8081/user/isLogin
     @GetMapping("isLogin")
     public ApiResponse<String> isLogin() {
-        return ApiResponse.ok( "用户登录状态为： " + StpUtil.isLogin());
+        return ApiResponse.ok( "用户登录状态为： " + StpUtil.isLogin() + " , 当前登录用户id： " + StpUtil.getLoginId());
     }
 
 }
