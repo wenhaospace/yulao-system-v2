@@ -21,6 +21,7 @@
         <module>api</module>
         <module>service</module>
         <module>job</module>
+        <module>app-file-service</module>
     </modules>
 
 

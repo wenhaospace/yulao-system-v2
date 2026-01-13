@@ -9,8 +9,7 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>service</artifactId>
-
+    <artifactId>app-file-service</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -25,13 +24,24 @@
             <version>1.0</version>
         </dependency>
 
+        <!-- Source: https://mvnrepository.com/artifact/io.minio/minio -->
         <dependency>
-            <groupId>com.wendell</groupId>
-            <artifactId>app-file-service</artifactId>
-            <version>1.0</version>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.7</version>
         </dependency>
-
-
     </dependencies>
+
+
+
+    <!-- 依赖这个插件来将代码打包成可执行的jar包   -->
+<!--    <build>-->
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>org.springframework.boot</groupId>-->
+<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </build>-->
 
 </project>
