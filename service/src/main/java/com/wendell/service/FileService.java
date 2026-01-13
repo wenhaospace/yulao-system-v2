@@ -1,5 +1,6 @@
 package com.wendell.service;
 
+import com.wendell.repository.FileMapper;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,12 @@ public class FileService {
     @Qualifier("minioService")
     private ObjectStorageService objectStorageService;
 
+    @Resource
+    private FileMapper fileMapper;
+
     private static final String BUCKET_NAME = "test-bucket";
 
+    //==================== Minio  操作区域 ====================
     public void test() {
         try {
             objectStorageService.createBucketIfNotExists("test-bucket");
@@ -57,5 +62,12 @@ public class FileService {
         }
         return result;
     }
+
+    //==================== Minio 操作区域 ====================
+
+    // ==================== 本地数据库操作区域 ====================
+
+
+
 
 }
