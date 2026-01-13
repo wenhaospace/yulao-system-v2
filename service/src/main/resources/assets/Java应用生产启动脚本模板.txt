@@ -1,0 +1,144 @@
+#!/bin/bash
+# File: jar-service.sh
+# Desc: 标准化JAR服务管理脚本
+
+# 基础目录
+BASE_DIR=$(cd "$(dirname "$0")"; pwd)
+CONFIG_DIR="${BASE_DIR}/config"
+LOG_DIR="${BASE_DIR}/logs"
+JAR_FILE="${BASE_DIR}/ems-eem-system-api.jar"  # 修改为实际JAR包路径
+PID_FILE="${BASE_DIR}/service.pid"
+APP_INFO="${BASE_DIR}/app.info"
+
+# 初始化变量
+MAIN_CLASS=""
+JVM_OPTS=""
+
+# 加载环境配置
+load_config() {
+    # 必须配置文件检测
+    [ ! -f "${APP_INFO}" ] && echo "[ERROR] app.info配置文件缺失" && exit 1
+    [ ! -f "${CONFIG_DIR}/application.yml" ] && echo "[ERROR] application.yml缺失" && exit 1
+    [ ! -f "${CONFIG_DIR}/logback-spring.xml" ] && echo "[ERROR] logback.xml缺失" && exit 1
+
+    # 加载可选环境变量文件
+    [ -f "${BASE_DIR}/.env" ] && source "${BASE_DIR}/.env"
+
+    # 修改后的配置解析代码
+    while IFS= read -r line; do
+        # 过滤注释和空行
+        [[ "$line" =~ ^# ]] || [ -z "$line" ] && continue
+
+        # 提取键值对
+        key=$(echo "$line" | awk -F'::' '{gsub(/^[ \t]+|[ \t]+$/, "", $1); print $1}')
+        value=$(echo "$line" | awk -F'::' '{gsub(/^[ \t:]+|[ \t:]+$/, "", $2); print $2}')
+
+        case "$key" in
+            'mainclass') MAIN_CLASS="$value" ;;
+            'vmoptions') JVM_OPTS="$value" ;;
+        esac
+    done < "${APP_INFO}"
+
+
+    # 配置校验
+    [ -z "$MAIN_CLASS" ] && echo "[ERROR] app.info缺少mainclass配置" && exit 1
+    [ -z "$JVM_OPTS" ] && echo "[ERROR] app.info缺少vmoptions配置" && exit 1
+}
+
+# 构建启动命令
+build_command() {
+    JAVA_CMD="java \
+        ${JVM_OPTS} \
+        -jar ${JAR_FILE} \
+        --spring.config.location=${CONFIG_DIR}/ \
+        --logging.config=file:${CONFIG_DIR}/logback-spring.xml"
+}
+
+# 启动服务
+start() {
+    load_config
+
+    if [ -f "${PID_FILE}" ]; then
+        PID=$(cat "${PID_FILE}")
+        if ps -p "${PID}" > /dev/null 2>&1; then
+            echo "[INFO] 服务已在运行，PID: ${PID}"
+            exit 0
+        else
+            echo "[WARN] 检测到残留PID文件，清除中..."
+            rm -f "${PID_FILE}"
+        fi
+    fi
+
+    echo "启动参数:"
+    echo "mainclass: ${MAIN_CLASS}"
+    echo "JVM选项: ${JVM_OPTS}"
+    echo "配置文件: ${CONFIG_DIR}/application.yml"
+    echo "日志配置: ${CONFIG_DIR}/logback.xml"
+
+    # 创建日志目录
+    mkdir -p "${LOG_DIR}"
+
+    # 启动命令
+    build_command
+
+    nohup ${JAVA_CMD} > "${LOG_DIR}/console.log" 2>&1 &
+
+    PID=$!
+    sleep 2
+
+    if ps -p "${PID}" > /dev/null 2>&1; then
+        echo "${PID}" > "${PID_FILE}"
+        echo "[SUCCESS] 服务启动成功，PID: ${PID}"
+    else
+        echo "[ERROR] 服务启动失败，请检查日志: ${LOG_DIR}/console.log"
+        exit 1
+    fi
+}
+
+stop() {
+    echo "======== 停止服务 ========"
+    if [ -f "${PID_FILE}" ]; then
+        PID=$(cat "${PID_FILE}")
+        if ps -p "${PID}" > /dev/null 2>&1; then
+            echo "[INFO] 发送关闭信号，PID: ${PID}"
+            kill -15 "${PID}"
+
+            # 等待进程退出（最多 30 秒）
+            TIMEOUT=30
+            while ps -p "${PID}" > /dev/null 2>&1 && [ $TIMEOUT -gt 0 ]; do
+                sleep 1
+                TIMEOUT=$((TIMEOUT-1))
+            done
+
+            if ps -p "${PID}" > /dev/null 2>&1; then
+                echo "[WARN] 进程未退出，执行 kill -9 强制结束"
+                kill -9 "${PID}"
+            else
+                echo "[SUCCESS] 进程已正常退出"
+            fi
+
+            rm -f "${PID_FILE}"
+        else
+            echo "[WARN] 进程 ${PID} 不存在，清除残留PID文件"
+            rm -f "${PID_FILE}"
+        fi
+    else
+        echo "[INFO] 服务未运行"
+    fi
+}
+
+# 重启服务
+restart() {
+    stop
+    start
+}
+
+# 主逻辑
+case "$1" in
+    start)   start ;;
+    stop)    stop ;;-
+    restart) restart ;;
+    *)
+        echo "使用方法: $0 {start|stop|restart}"
+        exit 1
+esac
