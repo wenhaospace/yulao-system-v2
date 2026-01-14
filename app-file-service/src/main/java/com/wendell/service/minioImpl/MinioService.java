@@ -38,7 +38,7 @@ public class MinioService implements ObjectStorageService {
     }
 
     @Override
-    public void uploadFile(String bucketName, String objectName, byte[] data) throws Exception{
+    public void uploadFile(String bucketName, String objectName, byte[] data, String contentType) throws Exception{
 
         minioClient.putObject(
                 PutObjectArgs.builder()
@@ -48,6 +48,7 @@ public class MinioService implements ObjectStorageService {
                                 new java.io.ByteArrayInputStream(data),
                                 data.length,
                                 -1)
+                        .contentType(contentType)
                         .build());
 
         logger.info("✅ 文件上传成功！");

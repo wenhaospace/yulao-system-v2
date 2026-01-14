@@ -84,6 +84,15 @@
         </dependency>
 
 
+        <!--   辅助开发工具 - 提供很多常用的处理工具方法，例如文件路径处理等     -->
+        <!-- Source: https://mvnrepository.com/artifact/cn.hutool/hutool-all -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.8.43</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

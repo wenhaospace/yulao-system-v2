@@ -2,6 +2,7 @@ package com.wendell.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +12,8 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("yulao.file")
-public class File {
+@Accessors(chain = true)
+public class FileDB {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id; // BIGINT UNSIGNED -> Long
 

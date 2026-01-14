@@ -1,11 +1,21 @@
 package com.wendell.service;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
+import com.wendell.entity.FileDB;
 import com.wendell.repository.FileMapper;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -32,10 +42,30 @@ public class FileService {
         }
     }
 
-    public void uploadFile() {
+    @Transactional
+    public void uploadFile(MultipartFile file) {
         try {
             objectStorageService.createBucketIfNotExists(BUCKET_NAME);
-            objectStorageService.uploadFile(BUCKET_NAME, "example.txt", "Hello, MinIO!".getBytes());
+
+            // 用于保证可以上传重复的文件
+            String file_id = IdUtil.fastSimpleUUID();
+            // 原始文件名
+            String originalFileName = file.getOriginalFilename();
+            // 文件类型
+            String contentType = file.getContentType();
+            // 重新组织文件名，用于Minio存储
+            String objectName =  DateUtil.date().toString("yyyy-MM-dd-mm") + "_" + file_id + "_" + originalFileName;
+
+            // 存储文件到Minio
+            objectStorageService.uploadFile(BUCKET_NAME, objectName, file.getBytes(), contentType);
+
+            // 更新本地数据库记录（示例代码，具体实现根据实际需求调整）
+            FileDB fileDB = new FileDB().setFileName(originalFileName)
+                    .setBucketName(BUCKET_NAME)
+                    .setObjectName(objectName)
+                    .setCreateTime(LocalDateTime.now());
+            fileMapper.insert(fileDB);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

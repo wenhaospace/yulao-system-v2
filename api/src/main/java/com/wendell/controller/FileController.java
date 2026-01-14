@@ -4,10 +4,8 @@ import com.wendell.entity.go.ApiResponse;
 import com.wendell.service.FileService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 
@@ -29,8 +27,12 @@ public class FileController {
     }
 
     @PostMapping("/upload")
-    public ApiResponse<String> uploadFile() {
-        fileService.uploadFile();
+    public ApiResponse<String> uploadFile(@RequestParam("file") MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            return ApiResponse.error(400,"文件不能为空");
+        }
+
+        fileService.uploadFile(file);
         return ApiResponse.ok("file upload success");
     }
 

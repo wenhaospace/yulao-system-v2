@@ -10,7 +10,7 @@ public interface ObjectStorageService {
 
     void createBucketIfNotExists(String bucketName) throws Exception;
 
-    void uploadFile(String bucketName, String objectName, byte[] data) throws Exception;
+    void uploadFile(String bucketName, String objectName, byte[] data, String contentType) throws Exception;
 
     String getPresignedUrl(String bucketName, String objectName, int expiryInSeconds) throws Exception;
 
