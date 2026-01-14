@@ -71,9 +71,16 @@ public class FileService {
         }
     }
 
-    public String getPresignedUrl() {
+    public String getPresignedUrl( String fileId) {
         try {
-            return objectStorageService.getPresignedUrl(BUCKET_NAME, "example.txt", 3600);
+
+            FileDB fileDB = fileMapper.selectById(Long.valueOf(fileId));
+            if (fileDB == null) {
+                throw new RuntimeException("File not found with ID: " + fileId);
+            }
+
+            return objectStorageService.getPresignedUrl(fileDB.getBucketName(), fileDB.getObjectName(), 3600);
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

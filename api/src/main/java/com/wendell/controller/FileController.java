@@ -36,9 +36,9 @@ public class FileController {
         return ApiResponse.ok("file upload success");
     }
 
-    @GetMapping("/presigned-url")
-    public ApiResponse<String> getPresignedUrl() {
-        String url = fileService.getPresignedUrl();
+    @GetMapping("/presigned-url/{fileId}")
+    public ApiResponse<String> getPresignedUrl(@PathVariable String fileId) {
+        String url = fileService.getPresignedUrl(fileId);
         return ApiResponse.ok(url);
     }
 
