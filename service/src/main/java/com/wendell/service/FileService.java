@@ -54,7 +54,7 @@ public class FileService {
             // 文件类型
             String contentType = file.getContentType();
             // 重新组织文件名，用于Minio存储
-            String objectName =  DateUtil.date().toString("yyyy-MM-dd-mm") + "_" + file_id + "_" + originalFileName;
+            String objectName = DateUtil.date().toString("yyyy-MM-dd") + "_" + file_id + "_" + originalFileName;
 
             // 存储文件到Minio
             objectStorageService.uploadFile(BUCKET_NAME, objectName, file.getBytes(), contentType);
@@ -86,8 +86,16 @@ public class FileService {
         }
     }
 
-    public byte[] downloadFile() {
-        return objectStorageService.downloadFile(BUCKET_NAME, "example.txt");
+    public FileDB fetchFileMetaData(String fileId) {
+        FileDB fileDB = fileMapper.selectById(Long.valueOf(fileId));
+        if (fileDB == null) {
+            throw new RuntimeException("File not found with ID: " + fileId);
+        }
+        return fileDB;
+    }
+
+    public byte[] downloadFile(FileDB fileDB) {
+        return objectStorageService.downloadFile(fileDB.getBucketName(), fileDB.getObjectName());
     }
 
     public List<String> listFiles() {

@@ -1,13 +1,17 @@
 package com.wendell.controller;
 
+import cn.hutool.core.util.IdUtil;
+import com.wendell.entity.FileDB;
 import com.wendell.entity.go.ApiResponse;
 import com.wendell.service.FileService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author ZhangWenhao
@@ -42,12 +46,17 @@ public class FileController {
         return ApiResponse.ok(url);
     }
 
-    @GetMapping("/download")
-    public void downloadFile(HttpServletResponse response ) {
-        byte[] fileData = fileService.downloadFile();
+    @GetMapping("/download/{fileId}")
+    public void downloadFile(@PathVariable String fileId, HttpServletResponse response) {
+        FileDB fileDB = fileService.fetchFileMetaData(fileId);
+        byte[] fileData = fileService.downloadFile(fileDB);
+
+        // 需要对文件名进行 URL 编码，防止中文或特殊字符导致的问题
+        String encoded = UriUtils.encode(fileDB.getFileName(), StandardCharsets.UTF_8);
+        String outputFileName = encoded+"_"+ IdUtil.simpleUUID();
         try {
             response.setContentType("application/octet-stream");
-            response.setHeader("Content-Disposition", "attachment; filename=\"example.txt\"");
+            response.setHeader("Content-Disposition", "attachment; filename=\""+outputFileName+"\"");
             response.getOutputStream().write(fileData);
             response.getOutputStream().flush();
         } catch (Exception e) {
