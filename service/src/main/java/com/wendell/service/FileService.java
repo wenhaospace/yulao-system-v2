@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.wendell.entity.FileDB;
 import com.wendell.entity.vo.FileVo;
 import com.wendell.repository.FileMapper;
@@ -114,7 +115,14 @@ public class FileService {
 
     // ==================== 本地数据库操作区域 ====================
     public List<FileVo> getAllFiles() {
-        List<FileDB> fileDBS = fileMapper.selectList(null);
+        // 构建查询条件：只查未删除的数据
+        LambdaQueryWrapper<FileDB> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(FileDB::getLogicDeleted, 0); // logicDeleted = 0
+        // 如果你还想加更多条件，例如非空判断或模糊匹配：
+        // queryWrapper.like(FileDB::getFileName, "report"); // fileName LIKE '%report%'
+        // queryWrapper.eq(FileDB::getBucketName, "my-bucket");
+
+        List<FileDB> fileDBS = fileMapper.selectList(queryWrapper);
 
         List<FileVo> fileVos = new ArrayList<>();
 
@@ -126,6 +134,16 @@ public class FileService {
                     fileVos.add(fileVo);
                 });
         return fileVos;
+    }
+
+    public void deleteFile(List<String> fileIds) {
+        // 逻辑删除：将 logicDeleted 字段设为 1
+        fileIds.forEach(fileId -> {
+            FileDB fileDB = new FileDB();
+            fileDB.setId(Long.valueOf(fileId));
+            fileDB.setLogicDeleted(1);
+            fileMapper.updateById(fileDB);
+        });
     }
 
 

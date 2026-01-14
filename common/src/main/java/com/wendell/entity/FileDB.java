@@ -18,7 +18,7 @@ public class FileDB {
     private Long id; // BIGINT UNSIGNED -> Long
 
     @TableField("bucketName")
-    private String bucketName = "";
+    private String bucketName;
 
     @TableField("objectName")
     private String objectName;
@@ -28,4 +28,7 @@ public class FileDB {
 
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;
+
+    @TableField("logicDeleted")
+    private Integer logicDeleted;
 }

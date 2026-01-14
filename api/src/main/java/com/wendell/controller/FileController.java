@@ -14,6 +14,7 @@ import org.springframework.web.util.UriUtils;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ZhangWenhao
@@ -65,6 +66,13 @@ public class FileController {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @PostMapping("/delete")
+    public ApiResponse<String> deleteFile(@RequestBody Map<String, List<String>> request) {
+        List<String> fileIds = request.get("fileIds");
+        fileService.deleteFile(fileIds);
+        return ApiResponse.ok("file[s] delete success");
     }
 
     @GetMapping("/list")
