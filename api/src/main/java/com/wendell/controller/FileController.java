@@ -3,6 +3,7 @@ package com.wendell.controller;
 import cn.hutool.core.util.IdUtil;
 import com.wendell.entity.FileDB;
 import com.wendell.entity.go.ApiResponse;
+import com.wendell.entity.vo.FileVo;
 import com.wendell.service.FileService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,6 +13,7 @@ import org.springframework.web.util.UriUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * @author ZhangWenhao
@@ -19,6 +21,7 @@ import java.nio.charset.StandardCharsets;
  */
 @RestController
 @RequestMapping("/files")
+@CrossOrigin("*")
 public class FileController {
 
     @Resource
@@ -98,6 +101,12 @@ public class FileController {
         } catch (IOException e) {
             throw new RuntimeException("File transfer failed", e);
         }
+    }
+
+    @GetMapping("/all")
+    public ApiResponse<List<FileVo>> getFileList() {
+        List<FileVo> resultList= fileService.getAllFiles();
+        return ApiResponse.ok(resultList);
     }
 
 }

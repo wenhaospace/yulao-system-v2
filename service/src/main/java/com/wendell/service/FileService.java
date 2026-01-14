@@ -5,6 +5,7 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import com.wendell.entity.FileDB;
+import com.wendell.entity.vo.FileVo;
 import com.wendell.repository.FileMapper;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -111,7 +113,20 @@ public class FileService {
     //==================== Minio 操作区域 ====================
 
     // ==================== 本地数据库操作区域 ====================
+    public List<FileVo> getAllFiles() {
+        List<FileDB> fileDBS = fileMapper.selectList(null);
 
+        List<FileVo> fileVos = new ArrayList<>();
+
+        fileDBS.forEach(fileDB -> {
+                    FileVo fileVo = new FileVo();
+                    fileVo.setId(String.valueOf(fileDB.getId()));
+                    fileVo.setFileName(fileDB.getFileName());
+                    fileVo.setCreateTime(fileDB.getCreateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                    fileVos.add(fileVo);
+                });
+        return fileVos;
+    }
 
 
 
