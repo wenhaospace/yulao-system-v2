@@ -4,6 +4,12 @@ server:
 spring:
   application:
     name: yulao
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB     # 允许单个文件上传大小， 最大 50MB
+      max-request-size: 50MB  # 整个请求最大 50MB（如果是多文件上传，总和不能超过这个值）
+#      file-size-threshold: 0B # 立即写入磁盘，不缓存到内存
   datasource:
     url: jdbc:mysql://47.245.100.81:3306/yulao?useSSL=false&serverTimezone=UTC
     username: admin
