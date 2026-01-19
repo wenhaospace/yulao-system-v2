@@ -6,6 +6,7 @@ import com.wendell.entity.go.ApiResponse;
 import com.wendell.entity.vo.FileVo;
 import com.wendell.service.FileService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -56,13 +57,14 @@ public class FileController {
         byte[] fileData = fileService.downloadFile(fileDB);
 
         // 需要对文件名进行 URL 编码，防止中文或特殊字符导致的问题
-        String encoded = UriUtils.encode(fileDB.getFileName(), StandardCharsets.UTF_8);
-        String outputFileName = encoded+"_"+ IdUtil.simpleUUID();
-        try {
+        String encoded = "filename*=UTF-8''" + UriUtils.encode(fileDB.getFileName(), StandardCharsets.UTF_8);
+        try (ServletOutputStream out = response.getOutputStream()){
             response.setContentType("application/octet-stream");
-            response.setHeader("Content-Disposition", "attachment; filename=\""+outputFileName+"\"");
-            response.getOutputStream().write(fileData);
-            response.getOutputStream().flush();
+            response.setHeader("Content-Disposition", "attachment; " + encoded);
+            response.setContentLength(fileData.length);
+
+            out.write(fileData);
+            out.flush();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
