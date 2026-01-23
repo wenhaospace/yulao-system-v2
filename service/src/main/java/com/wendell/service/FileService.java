@@ -82,8 +82,8 @@ public class FileService {
                 throw new RuntimeException("File not found with ID: " + fileId);
             }
 
-            String presignedUrl = objectStorageService.getPresignedUrl(fileDB.getBucketName(), fileDB.getObjectName(), 3600);
-            return  presignedUrl.replace("http://47.245.100.81:9000", "http://oss.wenhaospace.site");
+            return objectStorageService.getPresignedUrl(fileDB.getBucketName(), fileDB.getObjectName(), 3600);
+//            return  presignedUrl.replace("http://47.245.100.81:9000", "http://oss.wenhaospace.site");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
